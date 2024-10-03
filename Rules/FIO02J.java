@@ -2,8 +2,20 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * The FIO02J class demonstrates file input/output operations in Java,
+ * including creating a file and writing to it while handling potential errors.
+ * Rule: Detect and handle file-related errors
+ */
 public class FIO02J {
 
+    /**
+     * The main method serves as the entry point of the program.
+     * It defines a file, checks if it exists, creates it if it doesn't,
+     * and writes a message to it, handling any file-related exceptions.
+     *
+     * @param args Command-line arguments (not used in this example)
+     */
     public static void main(String[] args) {
         // Define the file path
         File file = new File("example.txt");
@@ -24,7 +36,7 @@ public class FIO02J {
 
         } catch (IOException e) {
             // Handle file-related exceptions
-            System.err.println("Error during file operations: ");
+            System.err.println("Error during file operations: " + e.getMessage());
         }
     }
 }
