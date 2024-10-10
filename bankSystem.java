@@ -6,7 +6,7 @@ import java.util.Scanner;
 //Also displays Rule: Do not serialize instances of inner classes, customer is a top level class.
 class Customer implements Cloneable, Serializable {
     private String name;
-    private int[] accountBalances;  // Stores multiple account balances as integers
+    private int[] accountBalances; // Stores multiple account balances as integers
 
     public Customer(String name, int[] accountBalances) {
         this.name = name;
@@ -26,9 +26,9 @@ class Customer implements Cloneable, Serializable {
     //// Rule: Do not invoke overridable methods in clone()
     @Override
     protected Object clone() throws CloneNotSupportedException {
-        Customer cloned = (Customer) super.clone();  // Default cloning
+        Customer cloned = (Customer) super.clone(); // Default cloning
         // Directly copy fields without invoking any overridable method
-        cloned.accountBalances = this.accountBalances.clone();  //clone the array
+        cloned.accountBalances = this.accountBalances.clone(); // clone the array
         return cloned; // Return the cloned customer
     }
 
@@ -39,25 +39,41 @@ class Customer implements Cloneable, Serializable {
 }
 
 public class bankSystem {
-    private static Customer[] customers = new Customer[100];  // Array to hold up to 100 customers
-    private static int customerCount = 0;  // Count of current customers
+    private static Customer[] customers = new Customer[100]; // Array to hold up to 100 customers
+    private static int customerCount = 0; // Count of current customers
 
     // Save the Customer object to a file (with proper error handling)
-    public static void printToFile(String filename) {
+    public static void printToFile(String filename) throws Exception {
+        @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
-        
+
         // Prompt for customer name
         System.out.print("Enter Customer Name: ");
         String name = scanner.nextLine();
-        
+
         // Prompt for account balances
-        System.out.print("Enter number of account balances: ");
-        int numAccounts = scanner.nextInt();
+        System.out.print("Enter number of account balances (0-5): ");
+        int temp = scanner.nextInt();
+        int numAccounts = -1;
+        if (temp <= 5 && temp >= 0) {
+            numAccounts = temp;
+        } else {
+            throw new Exception("invalid input");
+        }
+
         int[] accountBalances = new int[numAccounts];
+        int x = 0;
 
         for (int i = 0; i < numAccounts; i++) {
             System.out.print("Enter balance for account " + (i + 1) + ": ");
-            accountBalances[i] = scanner.nextInt();
+            x = scanner.nextInt();
+
+            if (x >= 0) {
+                accountBalances[i] = x;
+            }else{
+                throw new Exception("Invalid balance");
+            }
+
         }
 
         // Create a new Customer object
@@ -71,7 +87,8 @@ public class bankSystem {
             System.out.println("Customer saved to file: " + filename);
         } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
-        } finally {///Rule: Perform proper cleanup at program termination using try-catch and finally.
+        } finally {/// Rule: Perform proper cleanup at program termination using try-catch and
+                   /// finally.
             if (filePrinter != null) {
                 try {
                     filePrinter.close();
@@ -86,11 +103,13 @@ public class bankSystem {
         addCustomer(customer);
     }
 
-    /**  Method to load a Customer object from a file 
+    /**
+     * Method to load a Customer object from a file
      * 
      * Displays rule: handle file related errors using try catch
-     * */
+     */
     public static void loadCustomerByName(String filename) {
+        @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter the name of the customer to load: ");
         String searchName = scanner.nextLine();
@@ -105,9 +124,10 @@ public class bankSystem {
             } else {
                 System.out.println("No customer found with the name: " + searchName);
             }
-        } catch (IOException | ClassNotFoundException e) {//handle file related errors
+        } catch (IOException | ClassNotFoundException e) {// handle file related errors
             System.out.println("Error: " + e.getMessage());
-        } finally {//// Rule: Perform proper cleanup at program termination using try-catch and finally
+        } finally {//// Rule: Perform proper cleanup at program termination using try-catch and
+                   //// finally
             if (fileReader != null) {
                 try {
                     fileReader.close();
@@ -144,6 +164,7 @@ public class bankSystem {
 
     // Method to clone a customer by name
     public static void cloneCustomerByName() {
+        @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter the name of the customer to clone: ");
         String cloneName = scanner.nextLine();
@@ -160,7 +181,7 @@ public class bankSystem {
         if (customerToClone != null) {
             try {
                 Customer clonedCustomer = (Customer) customerToClone.clone();
-                addCustomer(clonedCustomer);  // Add cloned customer to the array
+                addCustomer(clonedCustomer); // Add cloned customer to the array
                 System.out.println("\nCloned Customer info:");
                 clonedCustomer.displayInfo();
             } catch (CloneNotSupportedException e) {
@@ -169,11 +190,79 @@ public class bankSystem {
         } else {
             System.out.println("No customer found with the name: " + cloneName);
         }
-     
+
+    }
+/**
+ * 
+ * this method prompts input for names
+ * it displays rules:
+ * ENV02-J: Do not trust the values of environment variables 
+ */
+    public static void scanName() throws Exception {
+        if (customerCount > 1) {//Rule: Do not trust environment variables
+            @SuppressWarnings("resource")
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Enter the name of first the customer: ");
+            String Name1 = scanner.nextLine();
+            System.out.print("Enter the name of first the customer: ");
+            String Name2 = scanner.nextLine();
+
+            if (matchBalance(Name1, Name2) == true) {
+                System.out.println("Match found");
+            } else {
+                System.out.println("No match");
+            }
+        } else {
+
+            throw new Exception("Not enough Customers");
+
+        }
+
+    }
+/**
+ * 
+ * 
+ * @param String a
+ * @param String b
+ * @return true or false
+ * 
+ * this method displays the rules
+ * MET00-J: Validate method arguments 
+ * EXP02-J. Do not use the Object.equals() method to compare two arrays 
+ */
+    public static boolean matchBalance(String a, String b) {
+        boolean match = false;
+        boolean found1=false;
+        boolean found2=false;
+
+        int[] arr1 = new int[6];
+
+        int[] arr2 = new int[6];
+
+        for (int i = 0; i < customerCount; i++) {// locate customers from customer array
+            if (customers[i].getName().equalsIgnoreCase(a)) {
+
+                arr1 = customers[i].getAccountBalances();
+                found1=true;
+
+            } else if (customers[i].getName().equalsIgnoreCase(b)) {
+
+                arr2 = customers[i].getAccountBalances();
+                found2=true;
+            }
+        }
+        if(found1&&found2){//rule: validate method arguements
+
+        if (Arrays.equals(arr1, arr2)) {
+            match = true;
+
+        }}
+
+        return match;
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
         String filename = "Customer.dat";
 
@@ -181,9 +270,10 @@ public class bankSystem {
         do {
             System.out.println("\n--- Bank System Menu ---");
             System.out.println("1. Display All Customers");
-            System.out.println("2. Save Customer");
+            System.out.println("2. Add Customer");
             System.out.println("3. Load Customer ");
             System.out.println("4. Clone Customer ");
+            System.out.println("5. Check customer balances match");
             System.out.println("0. Exit");
             System.out.print("Enter your choice: ");
             option = scanner.nextInt();
@@ -194,16 +284,39 @@ public class bankSystem {
                     printAllCustomers();
                     break;
                 case 2:
-                    printToFile(filename);
+                    try {
+                        printToFile(filename);
+                    } catch (Exception e) {
+                        System.out.println("Invalid input");
+
+                    }
                     break;
                 case 3:
-                    loadCustomerByName(filename);
+
+                    try {
+                        loadCustomerByName(filename);
+                    } catch (Exception e) {
+                        System.out.println("Error saving");
+                    }
+
                     break;
                 case 4:
-                    cloneCustomerByName();
+                    try {
+                        cloneCustomerByName();
+                    } catch (Exception e) {
+                        System.out.println("Error cloning");
+                    }
+
                     break;
+                case 5:
+                    try {
+                        scanName();
+                    } catch (Exception e) {
+                        System.out.println("Not enough customers");
+                    }
+
                 case 0:
-                    System.out.println("End"+ "\uD83D\uDE00" );
+                    System.out.println("End " + "\uD83D\uDE00");
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
