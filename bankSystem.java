@@ -551,9 +551,17 @@ public static void scanName() {
     /**
      * Method to calculate the average balance of a customer's accounts
      * Rule NUM07: J use Nan and not == to compare floats
+     * Rule NUM02-J. Ensure that division and remainder operations do not result in divide-by-zero errors
      */    
     public static double calculateAverageBalance(Customer customer) {
         int[] accountBalances = customer.getAccountBalances();
+
+        // NUM02-J: Check for zero to avoid division by zero
+        if (accountBalances.length == 0) { 
+            System.out.println("No account balances available for average calculation. Returning default value.");
+            return 0.0; // Return default value
+        }
+
         int sum = 0;
 
         for (int balance : accountBalances) {
