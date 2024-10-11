@@ -23,16 +23,19 @@ import java.text.Normalizer;
 */
 
 // SEC07-J: Custom class loader example calling super.getPermissions()
-/**  class SecureClassLoaderExample extends ClassLoader {
-    @Override
-    protected PermissionCollection getPermissions(CodeSource cs) {
-        // Calling the superclass's getPermissions() to ensure system-wide security policies are respected
-        PermissionCollection pc = super.getPermissions(cs);
-        // Optionally add additional permissions if needed
-        pc.add(new RuntimePermission("exitVM"));
-        return pc;
-    }
-} */
+/**  
+ * class SecureClassLoaderExample extends ClassLoader {
+ *     @Override
+ *     protected PermissionCollection getPermissions(CodeSource cs) {
+ *         // Calling the superclass's getPermissions() to ensure system-wide security policies are respected
+ *         PermissionCollection pc = super.getPermissions(cs);
+ *         // Optionally add additional permissions if needed
+ *         pc.add(new RuntimePermission("exitVM"));
+ *         return pc;
+ *     }
+ * }
+ */
+
 
 class Customer implements Cloneable, Serializable {
     private String name;
