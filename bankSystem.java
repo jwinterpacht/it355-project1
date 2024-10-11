@@ -7,6 +7,7 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.text.Normalizer;
+import java.util.Locale;
 /*
 *
 *
@@ -300,16 +301,18 @@ public static void loadCustomerByName(String filename) {
  * @return The customer object if found, otherwise null.
  * //Rule NUM09: Do not use floating point values in for loops
  * // Rule IDS01-J. Normalize strings before validating them
+ * // Rule STR02-J. Specify an appropriate locale when comparing locale-dependent data
  */
 private static Customer findCustomerByName(String name) {
-    // Rule IDS01-J
+    // Rule IDS01-J and STR02-J
     // Normalize the input before string validation
-    String normalizedInput = Normalizer.normalize(name, Normalizer.Form.NFC);
+    // Specify a locale
+    String normalizedInput = Normalizer.normalize(name, Normalizer.Form.NFC).toLowerCase(Locale.ENGLISH);
     
     //Rule NUM09
     for (int i = 0; i < customerCount; i++) {
         // Normalize stored names for comparison
-        String normalizedStoredName = Normalizer.normalize(customers[i].getName(), Normalizer.Form.NFC);
+        String normalizedStoredName = Normalizer.normalize(customers[i].getName(), Normalizer.Form.NFC).toLowerCase(Locale.ENGLISH);
         if (normalizedStoredName.equalsIgnoreCase(normalizedInput)) {
             return customers[i];
         }
@@ -353,6 +356,7 @@ public static void scanName() {
  * MET00-J: Validate method arguments 
  * EXP02-J. Do not use the Object.equals() method to compare two arrays
  * EXP03-J. Do not use equality operators when comparing values of boxed primitives
+ * STR02-J. Specify an appropriate locale when comparing locale-dependent data
  * Displays Recommendation: OBJ54-J. Do not attemp to help the garabage collector by setting local reference variables to null 
  * Displays Recommendation: EXP 50-J: Do not confuse object equality with reference equality
  */
@@ -367,13 +371,14 @@ public static void scanName() {
         int[] arr2 = new int[6];
 
         for (int i = 0; i < customerCount; i++) {// locate customers from customer array
-            if (customers[i].getName().equalsIgnoreCase(a)) {
+            // Specify the locale
+            if (customers[i].getName().toLowerCase(Locale.ENGLISH).equalsIgnoreCase(a.toLowerCase(Locale.ENGLISH))) {
 
                 //EXP00-J: do not ignore return values by methods
                 arr1 = customers[i].getAccountBalances();
                 found1=true;
 
-            } else if (customers[i].getName().equalsIgnoreCase(b)) {
+            } else if (customers[i].getName().toLowerCase(Locale.ENGLISH).equalsIgnoreCase(b.toLowerCase(Locale.ENGLISH))) {
 
                 arr2 = customers[i].getAccountBalances();
                 found2=true;
@@ -569,4 +574,3 @@ public static void scanName() {
     }
 
 }
-
