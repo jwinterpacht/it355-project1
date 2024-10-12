@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.text.Normalizer;
 import java.util.Locale;
+import java.math.BigDecimal;
 /*
 *
 *
@@ -85,18 +86,28 @@ class Customer implements Cloneable, Serializable {
     }
 
 
-    //NUM52-J: Be aware of numeric promotion behavior
-    //NUM50-J: Convert integers to floating point for floating-point operations
-    //DCL54-J: Using meaningful symbolic constants to represent literal values
-    //OBJ08-J: Do not expose private memebers of an outer class from within a nested class
+    // NUM52-J. Be aware of numeric promotion behavior
+    // NUM50-J. Convert integers to floating point for floating-point operations
+    // DCL54-J. Using meaningful symbolic constants to represent literal values
+    // OBJ08-J. Do not expose private memebers of an outer class from within a nested class
+    // NUM10-J. Do not construct BigDecimal objects from floating-point literals
     class Account{
-        private static final double INTEREST_RATE = 0.05;
+        // NUM10-J: Create a BigDecimal object with a String
+        private final BigDecimal INTEREST_RATE = new BigDecimal("0.05");
 
         public void deposit(int accountNumber, int amount){
-           if (accountNumber >= 0 && accountNumber < accountBalances.length) {
-                accountBalances[accountNumber] += amount;
-                double interest = (accountBalances[accountNumber] * INTEREST_RATE);
-                accountBalances[accountNumber] += interest;
+            if (accountNumber >= 0 && accountNumber < accountBalances.length) {
+                // BigDecimal objects created with ints
+                BigDecimal balance = new BigDecimal(accountBalances[accountNumber]);
+                BigDecimal depositAmount = new BigDecimal(amount);
+                
+                // Use BigDecimal methods for calculations
+                balance = balance.add(depositAmount);
+                BigDecimal interest = balance.multiply(INTEREST_RATE);
+                balance = balance.add(interest);
+                
+                // Convert the updated balance back to int for storing in accountBalances
+                accountBalances[accountNumber] = balance.intValue();
 
                 System.out.println("New Balance for account " + accountNumber + ": " + accountBalances[accountNumber]);
             } else {
