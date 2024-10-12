@@ -151,6 +151,8 @@ public class bankSystem {
 
         // Prompt for account balances
         System.out.print("Enter number of account balances (0-5): ");
+        // DCL51-J: Do not shadow or obscure identifiers in subscopes
+        // temp and numAccounts are distinct and scoped locally within the method without shadowing any class-level variables or parameters
         int temp = scanner.nextInt();
         int numAccounts = -1;
         if (temp <= 5 && temp >= 0) {
