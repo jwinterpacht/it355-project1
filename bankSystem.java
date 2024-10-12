@@ -40,6 +40,7 @@ import java.math.BigDecimal;
 
 
 class Customer implements Cloneable, Serializable {
+    // Recommendation DCL50-J: Use visually distinct identifiers
     private String name;
     private int[] accountBalances; // Stores multiple account balances
 
