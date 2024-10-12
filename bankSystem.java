@@ -48,7 +48,7 @@ class Customer implements Cloneable, Serializable {
         this.accountBalances = accountBalances;
     }
 
-    // Properly defined readObject method according to SER01-J
+    /* Properly defined readObject method according to SER01-J
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject(); // Reads the non-static and non-transient fields from the stream
     }
@@ -56,7 +56,7 @@ class Customer implements Cloneable, Serializable {
     // Properly defined writeObject method according to SER01-J
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject(); // Writes the non-static and non-transient fields to the stream
-    }
+    }*/
 
     // Final method to prevent overriding in subclasses
     public final String getName() {
@@ -64,6 +64,8 @@ class Customer implements Cloneable, Serializable {
     }
     // FIO05-J: Do not expose buffers or thier backing arrays
     public final int[] getAccountBalances() {
+        // OBJ13-J: Ensure that references to mutable objects are not exposed
+        // Make a copy of the accountBalances array so that the original may not be modified
         return accountBalances.clone(); // returns a copy to avoid exposing the internal buffer
     }
 
