@@ -124,6 +124,11 @@ class Customer implements Cloneable, Serializable {
     private static final ExecutorService executor = Executors.newFixedThreadPool(10);
 }
 public class bankSystem {
+    // SEC01-J: Helper method to sanitize input before allowing it into potentially sensitive or privileged blocks of code
+    private static String sanitizeInput(String input) {
+        // Remove any non-alphanumeric characters to prevent injection attacks
+        return input.replaceAll("[^a-zA-Z0-9]", "");
+    }
 
     // ENV06-J: Disable debugging in production code
     private static final boolean DEBUG = false;
@@ -139,7 +144,7 @@ public class bankSystem {
 
         // Prompt for customer name
         System.out.print("Enter Customer Name: ");
-        String name = scanner.nextLine();
+        String name = sanitizeInput(scanner.nextLine());
 
         // Prompt for account balances
         System.out.print("Enter number of account balances (0-5): ");
@@ -213,7 +218,7 @@ public static void loadCustomerByName(String filename) {
     @SuppressWarnings("resource")
     Scanner scanner = new Scanner(System.in);
     System.out.print("Enter the name of the customer to load: ");
-    String searchName = scanner.nextLine();
+    String searchName = sanitizeInput(scanner.nextLine());
 
     ObjectInputStream fileReader = null;
     try {
@@ -279,7 +284,7 @@ public static void loadCustomerByName(String filename) {
         @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter the name of the customer to clone: ");
-        String cloneName = scanner.nextLine();
+        String cloneName = sanitizeInput(scanner.nextLine());
         Customer customerToClone = null;
 
         // Search for the customer by name
@@ -342,9 +347,9 @@ public static void scanName() {
         @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter the name of the first customer: ");
-        String name1 = scanner.nextLine();
+        String name1 = sanitizeInput(scanner.nextLine());
         System.out.print("Enter the name of the second customer: ");
-        String name2 = scanner.nextLine();
+        String name2 = sanitizeInput(scanner.nextLine());
 
         if (matchBalance(name1, name2)) {// Recomendation :MET54-J. Always provide feedback about the resulting value of a method 
             System.out.println("Match found");
@@ -424,18 +429,17 @@ public static void scanName() {
         // ENV05-J: Ensure remote monitoring is disabled
         String jmxMonitoring = System.getProperty("com.sun.management.jmxremote");
         if (jmxMonitoring != null) {
-        System.out.println("Warning: Remote monitoring is enabled. Disabling it for security.");
-        System.clearProperty("com.sun.management.jmxremote");
+            System.out.println("Warning: Remote monitoring is enabled. Disabling it for security.");
+            System.clearProperty("com.sun.management.jmxremote");
         }
 
 
         // ENV04-J: Check that bytecode verification is enabled
         boolean bytecodeVerified = System.getProperty("java.class.path") != null;
-            if (!bytecodeVerified) {
-        System.out.println("Warning: Bytecode verification may not be enabled.");
-        } 
-        else {
-        System.out.println("Bytecode verification is enabled.");
+        if (!bytecodeVerified) {
+            System.out.println("Warning: Bytecode verification may not be enabled.");
+        } else {
+            System.out.println("Bytecode verification is enabled.");
         }
         
         
@@ -502,7 +506,7 @@ public static void scanName() {
                 break;
                 case 6: 
                 System.out.print("Enter the name of the customer to calculate the average balance: ");
-                String customerName = scanner.nextLine();
+                String customerName = sanitizeInput(scanner.nextLine());
                 Customer customer = findCustomerByName(customerName);
                 if (customer != null) {
                     calculateAverageBalance(customer);
@@ -512,7 +516,7 @@ public static void scanName() {
                 break;
                 case 7:
                     System.out.println("Enter the name of the customer to deposit to: ");
-                    String depositCustomerName = scanner.nextLine();
+                    String depositCustomerName = sanitizeInput(scanner.nextLine());
                     Customer depositCustomer = findCustomerByName(depositCustomerName);
                     if (depositCustomer != null) {
                         Customer.Account customerAccount = depositCustomer.new Account();
