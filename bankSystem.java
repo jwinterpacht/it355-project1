@@ -269,6 +269,8 @@ public static void loadCustomerByName(String filename) {
 
     // Method to print all customers in the array
     public static void printAllCustomers() {
+        // Recommendation EXP51-J. Do not perform assignments in conditional expressions
+        // This correctly compares the customerCount variable to 0
         if (customerCount == 0) {
             System.out.println("No customers available.");
             return;
