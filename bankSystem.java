@@ -91,7 +91,7 @@ class Customer implements Cloneable, Serializable {
     // DCL54-J. Using meaningful symbolic constants to represent literal values
     // OBJ08-J. Do not expose private memebers of an outer class from within a nested class
     // NUM10-J. Do not construct BigDecimal objects from floating-point literals
-    class Account{
+    class Account {
         // NUM10-J: Create a BigDecimal object with a String
         private final BigDecimal INTEREST_RATE = new BigDecimal("0.05");
 
@@ -563,6 +563,7 @@ public static void scanName() {
      * Method to calculate the average balance of a customer's accounts
      * Rule NUM07: J use Nan and not == to compare floats
      * Rule NUM02-J. Ensure that division and remainder operations do not result in divide-by-zero errors
+     * Rule NUM11-J. Do not compare or inspect the string representation of floating-point values
      */    
     public static double calculateAverageBalance(Customer customer) {
         int[] accountBalances = customer.getAccountBalances();
@@ -583,6 +584,8 @@ public static void scanName() {
         double average = (double) sum / accountBalances.length;
 
         // NUM07-J: Check for NaN in the result
+        // NUM11-J: Check the double value directly for NaN status without converting it to a string
+        // In Java, float and double are both considered floating-point types
         if (Double.isNaN(average)) {
             System.out.println("Average balance calculation resulted in NaN. Please check data integrity.");
             return 0.0; // Return a default value or handle the NaN case as appropriate
