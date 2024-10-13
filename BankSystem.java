@@ -173,11 +173,11 @@ class Customer implements Cloneable, Serializable {
 }
 
 /**
- * The bankSystem class provides a simple console-based bank management system.
+ * The BankSystem class provides a simple console-based bank management system.
  * It supports customer management, serialization, deserialization, and file
  * I/O.
  */
-public class bankSystem {
+public class BankSystem {
     // ENV06-J: Disable debugging in production code
     private static final boolean DEBUG = false;
     // OBJ01-J: limit accessibility of fields
