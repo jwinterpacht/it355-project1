@@ -93,6 +93,7 @@ class Customer implements Cloneable, Serializable {
      */
     public final int[] getAccountBalances() { // FIO05-J: Do not expose buffers or thier backing arrays
         // OBJ13-J: Ensure that references to mutable objects are not exposed
+        // Recommendation MET55-J: Return an empty array or collection instead of a null value for methods that return an array or collection
         // Make a copy of the accountBalances array so that the original may not be modified
         return accountBalances.clone(); // returns a copy to avoid exposing the internal buffer
     }
@@ -276,7 +277,7 @@ public class bankSystem {
             //Rule: FIO12-J: Ensures resource is only closed once
             filePrinter.writeObject(customer);
             System.out.println("Customer saved to file: " + filename);
-        } catch (IOException e) {
+        } catch (IOException e) {//ERR01-J: Do not allow exceptions to expose sensitive information 
             System.out.println("Error saving ");
         } finally {/// Rule: Perform proper cleanup at program termination using try-catch and
                    /// finally.
@@ -286,7 +287,7 @@ public class bankSystem {
                     //Rule:FIO14-J: Perform proper cleanup at program termination
                     filePrinter.close();
                     System.out.println("File stream closed.");
-                } catch (IOException e) {
+                } catch (IOException e) {//ERR01-J: Do not allow exceptions to expose sensitive information 
                     System.out.println("Error: Failed to close the file stream.");
                 }
             }
@@ -304,6 +305,7 @@ public class bankSystem {
  * Displays rule: FIO02-J: Detect and handle file-related errors
  * Displays Rule: FIO04-J: Release resources when no longer needed
  * Displays Rule: ERR0-J: Ensure the file stream is closed
+ * Displays Rule: ERR01-J: Do not allow exceptions to expose sensitive information 
  * Displays Rule: FIO12-J: Ensures resource is only closed once
  * Displays recomendation: FIO50-J. Do not make assumptions about file creation 
  * 
@@ -385,6 +387,7 @@ public static void loadCustomerByName(String filename) {
      * This method clones an existing Customer object and adds the cloned Customer to the list.
      * 
      * Rule: MET06-J: Do not invoke overridable methods in clone()
+     * Rule: ERR01-J: Do not allow exceptions to expose sensitive information 
      */
     public static void cloneCustomerByName() {
         @SuppressWarnings("resource")
@@ -588,7 +591,7 @@ public static void scanName() {
             System.out.print("Enter your choice: ");
             option = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-
+//All catch show rule: ERR01-J: Do not allow exceptions to expose sensitive information 
             switch (option) {
                 case 1:
                     printAllCustomers();
@@ -701,6 +704,7 @@ public static void scanName() {
      * Reads customer names from a text file and prints them to the console.
      * This method uses character-based input and properly distinguishes between bytes and characters.
      * Rule: FIO08-J: Distinguish between characters or bytes from a stream
+     * Rule: ERR01-J: Do not allow exceptions to expose sensitive information 
      */
     public static void readCustomerNamesFromFile(String filename) {
         // Using BufferedReader to read characters from a file
