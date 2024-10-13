@@ -38,44 +38,75 @@ import java.math.BigDecimal;
  * }
  */
 
-
+/**
+ * The Customer class represents a bank customer with account balances.
+ * This class demonstrates proper serialization, cloning, and encapsulation.
+ */
 class Customer implements Cloneable, Serializable {
     // Recommendation DCL50-J: Use visually distinct identifiers
     private String name;
     private int[] accountBalances; // Stores multiple account balances
 
+    /**
+     * Constructs a Customer object with a name and account balances.
+     * @param name The name of the customer.
+     * @param accountBalances An array of integers representing account balances.
+     */
     public Customer(String name, int[] accountBalances) {
         this.name = name;
         this.accountBalances = accountBalances;
     }
 
-    // SER01-J: Do not deviate from the proper signatures of serialization methods
-    // Properly defined readObject method
+    /**
+     * Deserializes the object. This method should not be altered as per SER01-J:
+     * Do not deviate from the proper signatures of serialization methods
+     * @param in The ObjectInputStream used for deserialization.
+     * @throws IOException If an I/O error occurs.
+     * @throws ClassNotFoundException If a class is not found.
+     */
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // Reads the non-static and non-transient fields from the stream (transient meaning should not be serialized)
         in.defaultReadObject();
     }
 
-    // Properly defined writeObject method according to SER01-J
+    /**
+     * Serializes the object. This method should not be altered as per SER01-J.
+     * @param out The ObjectOutputStream used for serialization.
+     * @throws IOException If an I/O error occurs.
+     */
     private void writeObject(ObjectOutputStream out) throws IOException {
         // Writes the non-static and non-transient fields to the stream
         out.defaultWriteObject();
     }
 
-    // Final method to prevent overriding in subclasses
-    public final String getName() {
+    /**
+     * Gets the customer's name.
+     * @return The name of the customer.
+     */
+    public final String getName() { // Final method to prevent overriding in subclasses
         return name;
     }
-    // FIO05-J: Do not expose buffers or thier backing arrays
-    public final int[] getAccountBalances() {
+
+    /**
+     * Gets a copy of the account balances to prevent exposure of the original array.
+     * @return A cloned copy of the account balances array.
+     */
+    public final int[] getAccountBalances() { // FIO05-J: Do not expose buffers or thier backing arrays
         // OBJ13-J: Ensure that references to mutable objects are not exposed
         // Make a copy of the accountBalances array so that the original may not be modified
         return accountBalances.clone(); // returns a copy to avoid exposing the internal buffer
     }
 
-    // Clone method that does not call overridable methods
-    //// Rule: MET06-J: Do not invoke overridable methods in clone()
-    // MET04-J: The access level remains 'protected' to match the original method in the superclass
+    /**
+     * Creates a clone of the current Customer object.
+     * 
+     * Clone method that does not call overridable methods
+     * Rule: MET06-J: Do not invoke overridable methods in clone()
+     * MET04-J: The access level remains 'protected' to match the original method in the superclass
+     * 
+     * @return A cloned Customer object.
+     * @throws CloneNotSupportedException If cloning is not supported.
+     */
     @Override
     protected Object clone() throws CloneNotSupportedException {
         Customer cloned = (Customer) super.clone(); // Default cloning
@@ -86,21 +117,31 @@ class Customer implements Cloneable, Serializable {
         return cloned; // Return the cloned customer
     }
 
+    /**
+     * Displays customer information, including name and account balances.
+     */
     public void displayInfo() {
         System.out.println("Name: " + name);
         System.out.println("Account Balances: " + Arrays.toString(accountBalances));
     }
 
-
-    // NUM52-J. Be aware of numeric promotion behavior
-    // NUM50-J. Convert integers to floating point for floating-point operations
-    // DCL54-J. Using meaningful symbolic constants to represent literal values
-    // OBJ08-J. Do not expose private memebers of an outer class from within a nested class
-    // NUM10-J. Do not construct BigDecimal objects from floating-point literals
+    /**
+     * The Account class represents a customer's account and includes methods for deposits.
+     * NUM52-J. Be aware of numeric promotion behavior
+     * NUM50-J. Convert integers to floating point for floating-point operations
+     * DCL54-J. Using meaningful symbolic constants to represent literal values
+     * OBJ08-J. Do not expose private memebers of an outer class from within a nested class
+     * NUM10-J. Do not construct BigDecimal objects from floating-point literals
+     */
     class Account {
         // NUM10-J: Create a BigDecimal object with a String
         private final BigDecimal INTEREST_RATE = new BigDecimal("0.05");
 
+        /**
+         * Deposits an amount into the account and applies interest.
+         * @param accountNumber The account number to deposit to.
+         * @param amount The amount to deposit.
+         */
         public void deposit(int accountNumber, int amount){
             if (accountNumber >= 0 && accountNumber < accountBalances.length) {
                 // BigDecimal objects created with ints
@@ -122,15 +163,29 @@ class Customer implements Cloneable, Serializable {
         }
     }
 
-
     // LCK01-J: Use a private final lock for synchronization
     private static final Object lock = new Object();
 
     // TPS00-J: Use a thread pool to handle tasks
     private static final ExecutorService executor = Executors.newFixedThreadPool(10);
 }
+
+/**
+ * The bankSystem class provides a simple console-based bank management system.
+ * It supports customer management, serialization, deserialization, and file I/O.
+ */
 public class bankSystem {
-    // Method to serialize a Customer object to a file
+    // ENV06-J: Disable debugging in production code
+    private static final boolean DEBUG = false;
+    //OBJ01-J: limit accessibility of fields
+    private static Customer[] customers = new Customer[100]; // Array to hold up to 100 customers
+    private static int customerCount = 0; // Count of current customers
+
+    /**
+     * Serializes a Customer object to a file.
+     * @param customer The customer to serialize.
+     * @param filePath The file path to save the serialized object.
+     */
     public static void serializeCustomer(Customer customer, String filePath) {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filePath))) {
             out.writeObject(customer);
@@ -140,7 +195,11 @@ public class bankSystem {
         }
     }
 
-    // Method to deserialize a Customer object from a file
+    /**
+     * Deserializes a Customer object from a file.
+     * @param filePath The file path to read the serialized object from.
+     * @return The deserialized Customer object or null if deserialization failed.
+     */
     public static Customer deserializeCustomer(String filePath) {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filePath))) {
             Customer customer = (Customer) in.readObject();
@@ -152,20 +211,24 @@ public class bankSystem {
         }
     }
 
-    // SEC01-J: Helper method to sanitize input before allowing it into potentially sensitive or privileged blocks of code
+    /**
+     * Sanitizes input to allow only alphanumeric characters, periods, and spaces.
+     * 
+     * SEC01-J: Helper method to sanitize input before allowing it into potentially sensitive or privileged blocks of code
+     * 
+     * @param input The input string to sanitize.
+     * @return A sanitized version of the input.
+     */
     private static String sanitizeInput(String input) {
         // Remove any non-alphanumeric characters to prevent injection attacks
         return input.replaceAll("[^a-zA-Z0-9. ]", "");
     }
 
-    // ENV06-J: Disable debugging in production code
-    private static final boolean DEBUG = false;
-    
-    //OBJ01-J: limit accessibility of fields
-    private static Customer[] customers = new Customer[100]; // Array to hold up to 100 customers
-    private static int customerCount = 0; // Count of current customers
-
-    // Save the Customer object to a file (with proper error handling)
+    /**
+     * Saves a new Customer object to a file after obtaining details from user input.
+     * @param filename The file path where the customer object is saved.
+     * @throws Exception If an invalid input is provided.
+     */
     public static void printToFile(String filename) throws Exception {
         @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
@@ -243,6 +306,8 @@ public class bankSystem {
  * Displays Rule: ERR0-J: Ensure the file stream is closed
  * Displays Rule: FIO12-J: Ensures resource is only closed once
  * Displays recomendation: FIO50-J. Do not make assumptions about file creation 
+ * 
+ * @param filename The file path to read the Customer object from.
  */
 public static void loadCustomerByName(String filename) {
     @SuppressWarnings("resource")
@@ -262,8 +327,8 @@ public static void loadCustomerByName(String filename) {
         } else {
             System.out.println("No customer found with the name: " + searchName);
         }
-        // Rule: FIO02-J:Detect and handle file-related errors
-        //Recomendation : FIO50-J. Do not make assumptions about file creation 
+        // Rule FIO02-J: Detect and handle file-related errors
+        // Recommendation FIO50-J: Do not make assumptions about file creation 
     } catch (FileNotFoundException e) { // handle file not found error specifically
 
         System.out.println("Error: File not found.");
@@ -271,8 +336,8 @@ public static void loadCustomerByName(String filename) {
         System.out.println("Error: File error ");
         
     } finally { 
-    //Rule ERR00-J: Ensure the file stream is closed.
-    //Rule:FIO14-J: Perform proper cleanup at program termination
+    // Rule ERR00-J: Ensure the file stream is closed
+    // Rule FIO14-J: Perform proper cleanup at program termination
         if (fileReader != null) {
             try {
                 fileReader.close();
@@ -284,8 +349,10 @@ public static void loadCustomerByName(String filename) {
     }
 }
 
-
-    // Method to add a customer to the array
+    /**
+     * Adds a Customer object to the array.
+     * @param customer The Customer object to add.
+     */
     private static void addCustomer(Customer customer) {
         if (customerCount < customers.length) {
             customers[customerCount++] = customer;
@@ -295,7 +362,9 @@ public static void loadCustomerByName(String filename) {
         }
     }
 
-    // Method to print all customers in the array
+    /**
+     * Prints information of all customers in the array.
+     */
     public static void printAllCustomers() {
         // Recommendation EXP51-J. Do not perform assignments in conditional expressions
         // This correctly compares the customerCount variable to 0
@@ -311,7 +380,12 @@ public static void loadCustomerByName(String filename) {
         }
     }
 
-    // Method to clone a customer by name
+    /**
+     * Method to clone a customer by name.
+     * This method clones an existing Customer object and adds the cloned Customer to the list.
+     * 
+     * Rule: MET06-J: Do not invoke overridable methods in clone()
+     */
     public static void cloneCustomerByName() {
         @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
@@ -344,12 +418,13 @@ public static void loadCustomerByName(String filename) {
 
 /**
  * Finds a customer by name in the customer array.
- *
+ * 
+ * Rule NUM09: Do not use floating point values in for loops
+ * Rule IDS01-J. Normalize strings before validating them
+ * Rule STR02-J. Specify an appropriate locale when comparing locale-dependent data
+ * 
  * @param name The name of the customer to find.
  * @return The customer object if found, otherwise null.
- * //Rule NUM09: Do not use floating point values in for loops
- * // Rule IDS01-J. Normalize strings before validating them
- * // Rule STR02-J. Specify an appropriate locale when comparing locale-dependent data
  */
 private static Customer findCustomerByName(String name) {
     // Rule IDS01-J and STR02-J
@@ -370,6 +445,7 @@ private static Customer findCustomerByName(String name) {
 
 /**
  * This method prompts input for names
+ * 
  * it displays rules:
  * ENV02-J: Do not trust the values of environment variables 
  * Displays Recomendation: MET54-J. Always provide feedback about the resulting value of a method 
@@ -393,22 +469,21 @@ public static void scanName() {
         throw new IllegalStateException("Not enough customers to perform the operation."); // ERR07-J: Using specific IllegalStateException
     }
 }
-/**
- * 
- * 
- * @param String a
- * @param String b
- * @return true or false
- * 
- * this method displays the rules
- * MET00-J: Validate method arguments 
- * EXP02-J. Do not use the Object.equals() method to compare two arrays
- * EXP03-J. Do not use equality operators when comparing values of boxed primitives
- * STR02-J. Specify an appropriate locale when comparing locale-dependent data
- * Displays Recommendation: OBJ54-J. Do not attempt to help the garabage collector by setting local reference variables to null 
- * Displays Recommendation: EXP50-J. Do not confuse object equality with reference equality
- * Displays Recommendation: DCL52-J. Do not declare more than one variable per declaration
- */
+    /**
+     * Checks if two customers have matching account balances.
+     * 
+     * Rule MET00-J: Validate method arguments
+     * Rule EXP02-J: Do not use Object.equals() method to compare two arrays
+     * Rule EXP03-J: Do not use equality operators when comparing values of boxed primitives
+     * Rule STR02-J: Specify an appropriate locale when comparing locale-dependent data
+     * Recommendation OBJ54-J: Do not attempt to help the garbage collector by setting local reference variables to null 
+     * Recommendation EXP50-J: Do not confuse object equality with reference equality
+     * Recommendation DCL52-J: Do not declare more than one variable per declaration
+     * 
+     * @param a The name of the first customer.
+     * @param b The name of the second customer.
+     * @return True if the balances match, false otherwise.
+     */
     public static boolean matchBalance(String a, String b) {
         // DCL52-J: Each variable is declared on its own line
         boolean match = false;
@@ -449,6 +524,18 @@ public static void scanName() {
         return match;
     }
 
+    /**
+     * The main method serves as the entry point for the Bank System application.
+     * It presents a menu to the user for interacting with Customer objects,
+     * including options to add, clone, serialize, deserialize, and display customer details.
+     * 
+     * ENV06-J: Disable debugging in production code.
+     * ENV05-J: Ensure remote monitoring is disabled.
+     * ENV04-J: Check that bytecode verification is enabled.
+     * 
+     * @param args Command-line arguments (not used in this application).
+     * @throws Exception If an error occurs while performing file operations or input handling.
+     */
     public static void main(String[] args) throws Exception {
         
         // ENV06-J: check to see if debugging in production code is on or not
@@ -667,5 +754,4 @@ public static void scanName() {
         System.out.println("Average Balance for " + customer.getName() + ": " + average);
         return average;
     }
-
 }
