@@ -49,15 +49,18 @@ class Customer implements Cloneable, Serializable {
         this.accountBalances = accountBalances;
     }
 
-    /* Properly defined readObject method according to SER01-J
+    // SER01-J: Do not deviate from the proper signatures of serialization methods
+    // Properly defined readObject method
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject(); // Reads the non-static and non-transient fields from the stream
+        // Reads the non-static and non-transient fields from the stream (transient meaning should not be serialized)
+        in.defaultReadObject();
     }
 
     // Properly defined writeObject method according to SER01-J
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject(); // Writes the non-static and non-transient fields to the stream
-    }*/
+        // Writes the non-static and non-transient fields to the stream
+        out.defaultWriteObject();
+    }
 
     // Final method to prevent overriding in subclasses
     public final String getName() {
@@ -127,10 +130,32 @@ class Customer implements Cloneable, Serializable {
     private static final ExecutorService executor = Executors.newFixedThreadPool(10);
 }
 public class bankSystem {
+    // Method to serialize a Customer object to a file
+    public static void serializeCustomer(Customer customer, String filePath) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            out.writeObject(customer);
+            System.out.println("Customer " + customer.getName() + " serialized to file: " + filePath);
+        } catch (IOException e) {
+            System.out.println("There was an error during serialization.");
+        }
+    }
+
+    // Method to deserialize a Customer object from a file
+    public static Customer deserializeCustomer(String filePath) {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filePath))) {
+            Customer customer = (Customer) in.readObject();
+            System.out.println("Customer " + customer.getName() + " deserialized from file: " + filePath);
+            return customer;
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("There was an error during deserialization.");
+            return null;
+        }
+    }
+
     // SEC01-J: Helper method to sanitize input before allowing it into potentially sensitive or privileged blocks of code
     private static String sanitizeInput(String input) {
         // Remove any non-alphanumeric characters to prevent injection attacks
-        return input.replaceAll("[^a-zA-Z0-9]", "");
+        return input.replaceAll("[^a-zA-Z0-9. ]", "");
     }
 
     // ENV06-J: Disable debugging in production code
@@ -380,31 +405,32 @@ public static void scanName() {
  * EXP02-J. Do not use the Object.equals() method to compare two arrays
  * EXP03-J. Do not use equality operators when comparing values of boxed primitives
  * STR02-J. Specify an appropriate locale when comparing locale-dependent data
- * Displays Recommendation: OBJ54-J. Do not attemp to help the garabage collector by setting local reference variables to null 
- * Displays Recommendation: EXP 50-J: Do not confuse object equality with reference equality
+ * Displays Recommendation: OBJ54-J. Do not attempt to help the garabage collector by setting local reference variables to null 
+ * Displays Recommendation: EXP50-J. Do not confuse object equality with reference equality
+ * Displays Recommendation: DCL52-J. Do not declare more than one variable per declaration
  */
     public static boolean matchBalance(String a, String b) {
+        // DCL52-J: Each variable is declared on its own line
         boolean match = false;
-        boolean found1=false;
-        boolean found2=false;
+        boolean found1 = false;
+        boolean found2 = false;
 
-        //OBJ54-J: Do not attempt to help the garbage collector by setting local refence variables to null
+        // OBJ54-J: Do not attempt to help the garbage collector by setting local refence variables to null
         int[] arr1 = new int[6];
-
         int[] arr2 = new int[6];
 
-        for (int i = 0; i < customerCount; i++) {// locate customers from customer array
+        for (int i = 0; i < customerCount; i++) { // locate customers from customer array
             // Specify the locale
             if (customers[i].getName().toLowerCase(Locale.ENGLISH).equalsIgnoreCase(a.toLowerCase(Locale.ENGLISH))) {
 
-                //EXP00-J: do not ignore return values by methods
+                // EXP00-J: do not ignore return values by methods
                 arr1 = customers[i].getAccountBalances();
-                found1=true;
+                found1 = true;
 
             } else if (customers[i].getName().toLowerCase(Locale.ENGLISH).equalsIgnoreCase(b.toLowerCase(Locale.ENGLISH))) {
 
                 arr2 = customers[i].getAccountBalances();
-                found2=true;
+                found2 = true;
             }
         }
         //Rule: MET00-J: Validate method arguments p9 done
@@ -470,6 +496,8 @@ public static void scanName() {
             System.out.println("5. Check customer balances match");
             System.out.println("6. Calculate Average Balance");
             System.out.println("7: Deposits");
+            System.out.println("8: Serialize Customer");
+            System.out.println("9: Deserialize Customer");
             System.out.println("0. Exit");
             System.out.print("Enter your choice: ");
             option = scanner.nextInt();
@@ -537,6 +565,40 @@ public static void scanName() {
 
                     } else {
                         System.out.println("No customer found with the name: " + depositCustomerName);
+                    }
+                    break;
+                case 8:
+                    // Serialize a Customer object
+                    System.out.print("Enter the name of the customer to serialize: ");
+                    String serializeCustomerName = sanitizeInput(scanner.nextLine());
+
+                    // Find the customer by name
+                    Customer customerToBeSerialized = findCustomerByName(serializeCustomerName);
+                    
+                    if (customerToBeSerialized != null) {
+                        // Ask for the file path to save the serialized object
+                        System.out.print("Enter the name of the file with the .ser extension to write to: ");
+                        String filePath = sanitizeInput(scanner.nextLine());
+
+                        // Serialize the customer object to the specified file
+                        serializeCustomer(customerToBeSerialized, filePath);
+                    } else {
+                        System.out.println("Customer not found.");
+                    }
+                    break;
+                case 9:
+                    // Deserialize a Customer object
+                    System.out.print("Enter the name of the file with the .ser extension to read from: ");
+                    String deserializeFilePath = sanitizeInput(scanner.nextLine());
+
+                    // Deserialize the Customer object from the specified file
+                    Customer deserializedCustomer = deserializeCustomer(deserializeFilePath);
+
+                    if (deserializedCustomer != null) {
+                        System.out.println("Deserialized Customer information:");
+                        deserializedCustomer.displayInfo();
+                    } else {
+                        System.out.println("Failed to deserialize the customer. Ensure the file exists and is valid.");
                     }
                     break;
                 case 0:
