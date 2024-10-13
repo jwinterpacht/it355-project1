@@ -511,8 +511,7 @@ public static void scanName() {
         //Rule: MET00-J: Validate method arguments p9 done
         if (found1 && found2) {
         for (int i = 0; i < Math.min(arr1.length, arr2.length); i++) {
-            // Rule EXP03-J
-            // Convert to Integer objects and use equals() for comparison
+            // EXP03-J: Convert to Integer objects and use equals() for comparison
             Integer balance1 = arr1[i];
             Integer balance2 = arr2[i];
             if (!balance1.equals(balance2)) {
