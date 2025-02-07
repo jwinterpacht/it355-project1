@@ -1,3 +1,2 @@
-Jaden and David have an extra branch (feature/name-edits) because they had to merge the edits they made with the main program.
-Everyone else was able to implement their rules and recommendations in a VSCode Live Share session.
-Each person's .java files demonstrating their rules and recommendations are on their proprietary branches.
+This is a simple banking application software written in Java to demonstrate secure coding practices within the Java language.  
+Completed in our IT 355 Secure Software Development Fall 2024 class at Illinois State University.
